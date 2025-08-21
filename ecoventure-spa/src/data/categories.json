@@ -1,0 +1,30 @@
+{
+  "categories": [
+    {
+      "id": "hiking",
+      "name": "Hiking",
+      "description": "Scenic hikes across UK parks.",
+      "tours": [
+        {
+          "id": "ld-hike",
+          "name": "Lake District Classic",
+          "image": "https://picsum.photos/seed/lake/800/500",
+          "description": "Full-day hike with viewpoints and lakes.",
+          "baseSlots": 12
+        }
+      ]
+    },
+    {
+      "id": "cycling",
+      "name": "Cycling",
+      "description": "Eco-friendly cycling routes.",
+      "tours": []
+    },
+    {
+      "id": "nature",
+      "name": "Nature Walks",
+      "description": "Gentle wildlife-focused walks.",
+      "tours": []
+    }
+  ]
+}
