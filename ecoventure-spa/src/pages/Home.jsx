@@ -36,7 +36,7 @@ export default function Home({ showSearch, onToggleSearch }) {
                     aria-label="Close search"
                     title="Close"
                   >
-                    ✕
+                    
                   </button>
                 </div>
                 <SearchFilters />
@@ -83,7 +83,10 @@ export default function Home({ showSearch, onToggleSearch }) {
       </div>
     </section>
 
-    <section className="bg-gray-100 py-12">
+    <section className="bg-gray-100 py-3">
+      <div className="font-extrabold text-3xl text-center my-10" > 
+        Activities
+      </div>
   <div className="max-w-6xl mx-auto px-4">
     <div className="flex flex-col md:flex-row items-center justify-center gap-6">
       {/* Card 1 */}

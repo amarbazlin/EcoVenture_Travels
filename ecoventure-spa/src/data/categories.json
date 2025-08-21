@@ -1,6 +1,12 @@
 {
   "categories": [
     {
+      "id": "cycling",
+      "name": "Cycling",
+      "description": "Eco‑friendly cycling routes across the UK.",
+      "tours": []
+    },
+    {
       "id": "hiking",
       "name": "Hiking",
       "description": "Scenic hikes across UK parks.",
@@ -15,15 +21,27 @@
       ]
     },
     {
-      "id": "cycling",
-      "name": "Cycling",
-      "description": "Eco-friendly cycling routes.",
+      "id": "mountain-climbing",
+      "name": "Mountain Climbing",
+      "description": "Guided alpine ascents for all levels.",
       "tours": []
     },
     {
-      "id": "nature",
-      "name": "Nature Walks",
-      "description": "Gentle wildlife-focused walks.",
+      "id": "rafting",
+      "name": "Rafting",
+      "description": "White-water adventures on UK rivers.",
+      "tours": []
+    },
+    {
+      "id": "wild-swimming",
+      "name": "Wild Swimming",
+      "description": "Freshwater swims in scenic locations.",
+      "tours": []
+    },
+    {
+      "id": "wildlife-watching",
+      "name": "Wildlife Watching",
+      "description": "Nature walks focused on local wildlife.",
       "tours": []
     }
   ]
