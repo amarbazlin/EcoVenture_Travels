@@ -6,4 +6,5 @@ export const DESTINATIONS = [
   { id: "central-america", name: "Central America", image: "/destinations/central-america.jpg" },
   { id: "north-america", name: "North America", image: "/destinations/north-america.jpg" },
   { id: "oceania", name: "Oceania", image: "/destinations/oceania.jpg" },
+
 ];

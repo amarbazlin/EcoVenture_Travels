@@ -3,20 +3,148 @@
     {
       "id": "cycling",
       "name": "Cycling",
-      "description": "Eco‑friendly cycling routes across the UK.",
-      "tours": []
+      "description": "Eco-friendly cycling routes across the UK.",
+      "tours": [
+        {
+          "id": "cycle-vietnam",
+          "name": "Cycling Vietnam",
+          "country": "VIETNAM",
+          "image": "/Cycling_Vietnam.avif",
+          "description": "Ride quiet lanes past farms and karst peaks, with market stops and riverside viewpoints.",
+          "days": 8,
+          "price": 1295,
+          "oldPrice": 1495,
+          "rating": 4.7,
+          "reviews": 178
+        },
+        {
+          "id": "cycle-costa-rica-coast",
+          "name": "Costa Rica Coast to Coast Ride",
+          "country": "COSTA RICA",
+          "image": "/coasta_rica.jpeg",
+          "description": "Cycle the Pacific coast and rainforests, spotting wildlife and swimming in warm bays.",
+          "days": 12,
+          "price": 2045,
+          "rating": 4.6,
+          "reviews": 96
+        },
+        {
+          "id": "cycle-baltics",
+          "name": "Cycle the Baltic Capitals",
+          "country": "ESTONIA / LATVIA / LITHUANIA",
+          "image": "/baltics.avif",
+          "description": "Pedal through old towns, coastal forests and national parks across three countries.",
+          "days": 10,
+          "price": 945,
+          "rating": 4.3,
+          "reviews": 37
+        },
+        {
+          "id": "cycle-puglia",
+          "name": "Cycling Puglia & Matera",
+          "country": "ITALY",
+          "image": "/italy.avif",
+          "description": "From the Sassi of Matera to whitewashed hill towns and the Adriatic coast.",
+          "days": 8,
+          "price": 1145,
+          "rating": 4.6,
+          "reviews": 87
+        },
+        {
+          "id": "cycle-dalmatian-coast",
+          "name": "Cycle Croatia's Dalmatian Coast",
+          "country": "CROATIA",
+          "image": "/croatia.avif",
+          "description": "Island-hopping rides with turquoise bays, medieval towns and seafood feasts.",
+          "days": 8,
+          "price": 1890,
+          "rating": 4.7,
+          "reviews": 150
+        },
+        {
+          "id": "cycle-sri-lanka",
+          "name": "Cycle the Back Roads of Sri Lanka",
+          "country": "SRI LANKA",
+          "image": "/coasta_rica.jpeg",
+          "description": "Tea estates, ancient cities and coastal villages linked by quiet back roads.",
+          "days": 14,
+          "price": 2355,
+          "rating": 4.8,
+          "reviews": 207
+        }
+      ]
     },
     {
       "id": "hiking",
       "name": "Hiking",
-      "description": "Scenic hikes across UK parks.",
+      "description": "Scenic hikes across UK parks and beyond.",
       "tours": [
         {
-          "id": "ld-hike",
-          "name": "Lake District Classic",
-          "image": "https://picsum.photos/seed/lake/800/500",
-          "description": "Full-day hike with viewpoints and lakes.",
-          "baseSlots": 12
+          "id": "hike-nepal-classic",
+          "name": "Nepal Himalayan Highlights",
+          "country": "NEPAL",
+          "image": "/nepal_hiking.webp",
+          "description": "Panoramic trails beneath snow giants, with teahouse hospitality.",
+          "days": 12,
+          "price": 1895,
+          "oldPrice": 2095,
+          "rating": 4.9,
+          "reviews": 240
+        },
+        {
+          "id": "hike-peru-inca",
+          "name": "Peru Andes & Inca Trails",
+          "country": "PERU",
+          "image": "/peru_hiking.webp",
+          "description": "High Andean passes, cloud forest paths and citadel viewpoints.",
+          "days": 10,
+          "price": 1795,
+          "rating": 4.8,
+          "reviews": 198
+        },
+        {
+          "id": "hike-italy-dolomites",
+          "name": "Italy Dolomites Explorer",
+          "country": "ITALY",
+          "image": "/italy_hiking.webp",
+          "description": "Cinematic limestone spires, meadow trails and mountain rifugi.",
+          "days": 8,
+          "price": 1395,
+          "rating": 4.7,
+          "reviews": 156
+        },
+        {
+          "id": "hike-morocco-atlas",
+          "name": "Morocco High Atlas Traverse",
+          "country": "MOROCCO",
+          "image": "/morocco_hiking.webp",
+          "description": "Berber villages, walnut groves and views towards Mount Toubkal.",
+          "days": 8,
+          "price": 995,
+          "rating": 4.7,
+          "reviews": 121
+        },
+        {
+          "id": "hike-slovakia-tatras",
+          "name": "Slovakia High Tatras Trails",
+          "country": "SLOVAKIA",
+          "image": "/slovakia_hiking.webp",
+          "description": "Granite peaks, alpine lakes and classic ridge walks in the Tatras.",
+          "days": 7,
+          "price": 1095,
+          "rating": 4.6,
+          "reviews": 84
+        },
+        {
+          "id": "hike-albania-accursed",
+          "name": "Albania Accursed Mountains",
+          "country": "ALBANIA",
+          "image": "/albania_hiking.webp",
+          "description": "Shepherd paths through dramatic limestone valleys and remote hamlets.",
+          "days": 9,
+          "price": 1195,
+          "rating": 4.7,
+          "reviews": 97
         }
       ]
     },
@@ -24,25 +152,206 @@
       "id": "mountain-climbing",
       "name": "Mountain Climbing",
       "description": "Guided alpine ascents for all levels.",
-      "tours": []
+      "tours": [
+        {
+          "id": "climb-nepal-intro",
+          "name": "Nepal Alpine Intro",
+          "country": "NEPAL",
+          "image": "/nepal_climbing.webp",
+          "description": "Glacier travel skills and a classic trekking-peak summit.",
+          "days": 12,
+          "price": 2395,
+          "rating": 4.8,
+          "reviews": 132
+        },
+        {
+          "id": "climb-morocco-toubkal",
+          "name": "Morocco Jebel Toubkal",
+          "country": "MOROCCO",
+          "image": "/morocco_climbing.webp",
+          "description": "North Africa’s highest summit from village basecamps.",
+          "days": 5,
+          "price": 845,
+          "rating": 4.7,
+          "reviews": 165
+        },
+        {
+          "id": "climb-portugal-serra",
+          "name": "Portugal Serra da Estrela",
+          "country": "PORTUGAL",
+          "image": "/protugal_climbing.webp",
+          "description": "Granite ridges and scrambles in Portugal’s wild highlands.",
+          "days": 4,
+          "price": 595,
+          "rating": 4.5,
+          "reviews": 58
+        },
+        {
+          "id": "climb-albania-prokletije",
+          "name": "Albania Prokletije Peaks",
+          "country": "ALBANIA",
+          "image": "/albania_climbing.webp",
+          "description": "Technical days on sharp limestone ridges with expert guides.",
+          "days": 6,
+          "price": 995,
+          "rating": 4.6,
+          "reviews": 72
+        },
+        {
+          "id": "climb-spain-picos",
+          "name": "Spain Picos de Europa",
+          "country": "SPAIN",
+          "image": "/spain_climbing.webp",
+          "description": "Classic Spanish limestone towers and airy summits.",
+          "days": 6,
+          "price": 1095,
+          "rating": 4.6,
+          "reviews": 90
+        },
+        {
+          "id": "climb-ecuador-cotopaxi",
+          "name": "Ecuador Cotopaxi Experience",
+          "country": "ECUADOR",
+          "image": "/ecuador_climbing.webp",
+          "description": "Acclimatisation hikes and a glacier ascent on an iconic volcano.",
+          "days": 9,
+          "price": 1795,
+          "oldPrice": 1945,
+          "rating": 4.7,
+          "reviews": 81
+        }
+      ]
     },
     {
       "id": "rafting",
       "name": "Rafting",
-      "description": "White-water adventures on UK rivers.",
-      "tours": []
+      "description": "White-water adventures on European rivers.",
+      "tours": [
+        {
+          "id": "raft-montenegro-tara",
+          "name": "Montenegro Tara Canyon",
+          "country": "MONTENEGRO",
+          "image": "/montenegro_rafting.webp",
+          "description": "Emerald pools, canyon walls and bouncy rapids on Europe’s deepest gorge.",
+          "days": 3,
+          "price": 385,
+          "rating": 4.7,
+          "reviews": 64
+        },
+        {
+          "id": "raft-france-durance",
+          "name": "France Durance & Ubaye",
+          "country": "FRANCE",
+          "image": "/france_rafting.webp",
+          "description": "Alpine rapids with pro safety crew and scenic wild-camp spots.",
+          "days": 3,
+          "price": 425,
+          "rating": 4.6,
+          "reviews": 71
+        },
+        {
+          "id": "raft-croatia-una",
+          "name": "Croatia Una & Zrmanja",
+          "country": "CROATIA",
+          "image": "/croatia_rafting.webp",
+          "description": "Waterfalls, warm water and playful rapids ideal for first-timers.",
+          "days": 3,
+          "price": 395,
+          "rating": 4.5,
+          "reviews": 53
+        }
+      ]
     },
     {
       "id": "wild-swimming",
       "name": "Wild Swimming",
       "description": "Freshwater swims in scenic locations.",
-      "tours": []
+      "tours": [
+        {
+          "id": "swim-greece-islands",
+          "name": "Greece Island Coves",
+          "country": "GREECE",
+          "image": "/greece_swim.webp",
+          "description": "Crystal coves and sea caves with boat support and coastal hikes.",
+          "days": 4,
+          "price": 545,
+          "rating": 4.6,
+          "reviews": 73
+        },
+        {
+          "id": "swim-uk-lakes",
+          "name": "UK Lake District Dips",
+          "country": "UNITED KINGDOM",
+          "image": "/uk_swim.webp",
+          "description": "Wild dips in tarns and lakes with safety kayak and hot chocolate.",
+          "days": 3,
+          "price": 495,
+          "rating": 4.7,
+          "reviews": 90
+        },
+        {
+          "id": "swim-finland-lakelands",
+          "name": "Finland Lakeland Swims",
+          "country": "FINLAND",
+          "image": "/finland_swim.webp",
+          "description": "Forest-rimmed lakes, evening saunas and sunrise swims.",
+          "days": 4,
+          "price": 575,
+          "rating": 4.6,
+          "reviews": 61
+        }
+      ]
     },
     {
       "id": "wildlife-watching",
       "name": "Wildlife Watching",
       "description": "Nature walks focused on local wildlife.",
-      "tours": []
+      "tours": [
+        {
+          "id": "wild-italy-umbria",
+          "name": "Italy Apennines Safari",
+          "country": "ITALY",
+          "image": "/italy_wild.webp",
+          "description": "Tracks and signs of wolves, deer and boar in beech forests.",
+          "days": 4,
+          "price": 795,
+          "rating": 4.7,
+          "reviews": 88
+        },
+        {
+          "id": "wild-ecuador-andes",
+          "name": "Ecuador Cloud Forest Watch",
+          "country": "ECUADOR",
+          "image": "/ecuador_wild.webp",
+          "description": "Hummingbirds, toucans and orchids on misty Andean slopes.",
+          "days": 5,
+          "price": 995,
+          "rating": 4.8,
+          "reviews": 102
+        },
+        {
+          "id": "wild-romania-danube",
+          "name": "Romania Danube Delta",
+          "country": "ROMANIA",
+          "image": "/romania_wild.webp",
+          "description": "Pelicans, herons and floating reedbeds by boat and boardwalk.",
+          "days": 4,
+          "price": 845,
+          "rating": 4.6,
+          "reviews": 67
+        },
+        {
+          "id": "wild-malaysia-borneo",
+          "name": "Malaysia Borneo Primates",
+          "country": "MALAYSIA",
+          "image": "/malaysia_wild.webp",
+          "description": "Search for orangutans, proboscis monkeys and hornbills with a local ranger.",
+          "days": 6,
+          "price": 1295,
+          "rating": 4.7,
+          "reviews": 75
+        }
+      ]
     }
   ]
 }

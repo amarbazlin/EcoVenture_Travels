@@ -3,10 +3,11 @@ import { useState } from "react";
 import { Routes, Route } from "react-router-dom";
 import Navbar from "./components/Navbar";
 import Home from "./pages/Home";
-import Categories from "./pages/Categories";
+import Activities from "./pages/Activities";
 import ToursByCategory from "./pages/ToursByCategory";
 import TourDetails from "./pages/TourDetails";
 import SearchFiltersOverlay from "./components/SearchFilters";
+import Footer from "./components/Footer";
 
 export default function App() {
   const [showSearch, setShowSearch] = useState(false);
@@ -24,11 +25,13 @@ export default function App() {
       <main>
         <Routes>
           <Route path="/" element={<Home />} />
-          <Route path="/categories" element={<Categories />} />
+          <Route path="/activities" element={<Activities />} />
           <Route path="/categories/:categoryId" element={<ToursByCategory />} />
           <Route path="/tour/:tourId" element={<TourDetails />} />
         </Routes>
       </main>
+
+      <Footer />
     </div>
   );
 }
