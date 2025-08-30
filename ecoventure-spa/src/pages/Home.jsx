@@ -92,7 +92,7 @@ export default function Home({ showSearch, onToggleSearch }) {
             {/* Card 1 */}
             <figure className="relative w-80 h-56 overflow-hidden rounded-2xl shadow">
               <img
-                src="/cycling .jpeg"   
+                src="/cycling .webp"   
                 alt="Cycling"
                 className="w-full h-full object-cover"
               />
@@ -104,7 +104,7 @@ export default function Home({ showSearch, onToggleSearch }) {
             {/* Card 2 */}
             <figure className="relative w-80 h-56 overflow-hidden rounded-2xl shadow">
               <img
-                src="/hiking.jpeg"
+                src="/hiking.webp"
                 alt="Hiking"
                 className="w-full h-full object-cover"
               />
@@ -135,7 +135,7 @@ export default function Home({ showSearch, onToggleSearch }) {
             {/* Card 4 */}
             <figure className="relative w-80 h-56 overflow-hidden rounded-2xl shadow">
               <img
-                src="/rafting.jpeg"
+                src="/rafting.webp"
                 alt="Rafting"
                 className="w-full h-full object-cover"
               />
@@ -159,7 +159,7 @@ export default function Home({ showSearch, onToggleSearch }) {
             {/* Card 6 */}
             <figure className="relative w-80 h-56 overflow-hidden rounded-2xl shadow">
               <img
-                src="/wildlife.jpeg"
+                src="/wildlife.webp"
                 alt="Wildlife Watching"
                 className="w-full h-full object-cover"
               />
