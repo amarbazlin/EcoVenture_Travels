@@ -8,14 +8,23 @@
   "orientation": "portrait",
   "icons": [
     {
-      "src": "/react.png",
-      "sizes": "192x192",
-      "type": "image/png"
+      "src": "/react.webp",
+      "sizes": "500x500",
+      "type": "image/webp"
+    }
+  ],
+  "screenshots": [
+    {
+      "src": "/deck_ss.png",
+      "sizes": "2844x1412",
+      "type": "image/png",
+      "form_factor": "wide"
     },
     {
-      "src": "/icons/icon-512.png",
-      "sizes": "512x512",
-      "type": "image/png"
+      "src": "/mobile_ss.png",
+      "sizes": "426x952",
+      "type": "image/png",
+      "form_factor": "narrow"
     }
   ]
 }
