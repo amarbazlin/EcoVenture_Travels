@@ -4,8 +4,34 @@ const urlsToCache = [
   "/index.html",
   "/manifest.json",
   "/icons/icon-192.png",
-  "/icons/icon-512.png"
+  "/icons/icon-512.png",
+  "/public/categories.json",
 ];
+self.addEventListener("install", event => {
+  event.waitUntil(
+    caches.open(CACHE_NAME).then(cache => {
+      // First, add the basic assets
+      return cache.addAll(urlsToCache)
+        .then(() => {
+          // Now, fetch the JSON and get image URLs
+          return fetch('/public/categories.json')
+            .then(response => response.json())
+            .then(data => {
+              const imageUrls = [];
+              data.categories.forEach(category => {
+                category.tours.forEach(tour => {
+                  if (tour.image) {
+                    imageUrls.push(tour.image);
+                  }
+                });
+              });
+              // Add all the extracted image URLs to the cache
+              return cache.addAll(imageUrls);
+            });
+        });
+    })
+  );
+});
 
 // Install event → cache essential assets
 self.addEventListener("install", event => {

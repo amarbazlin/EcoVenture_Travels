@@ -1,5 +1,5 @@
 import { useParams, Link } from "react-router-dom";
-import data from "../data/categories.json";
+
 
 export default function TourDetails() {
   const { tourId } = useParams();

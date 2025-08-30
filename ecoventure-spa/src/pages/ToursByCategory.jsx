@@ -1,5 +1,5 @@
 import { useParams, Link } from "react-router-dom";
-import data from "../data/categories.json";
+
 import TourCard from "../components/TourCard";
 import SearchBar from "../components/SearchBar";
 import { useMemo, useState } from "react";

@@ -1,7 +1,7 @@
 // src/pages/Activities.jsx
 import { useMemo, useState, useEffect } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-import data from "../data/categories.json";
+import data from "/public/categories.json";
 
 // ✅ Ask user for notification permission
 function askNotificationPermission() {

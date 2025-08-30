@@ -101,7 +101,7 @@ export default function Home({ showSearch, onToggleSearch }) {
         <div className="max-w-6xl mx-auto px-4">
           <div className="flex flex-col md:flex-row items-center justify-center gap-6 ">
             {[
-              { src: "/Wild_swimming.webp", label: "Baltics" },
+              { src: "/Wild_swimming.webp", label: "Wild Swimming" },
               { src: "/wildlife.webp", label: "Wild Watching" },
               { src: "/rafting.webp", label: "Rafting" }
               
