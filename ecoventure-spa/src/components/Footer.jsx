@@ -104,8 +104,8 @@ function DarkFooter() {
               Responsible travel is at our core. Better for you, local communities, wildlife
               and the planet.
             </p>
-            <a href="#" className="inline-block mt-3 text-teal-400 hover:text-teal-300 underline">
-              Learn More
+            <a href="#" className="inline-block mt-3 text-eco hover:underline" >
+              Go to top of page
             </a>
           </div>
         </div>
@@ -165,7 +165,7 @@ function Logo() {
   return (
     <div className="flex items-end gap-2">
       <span className="text-xl font-extrabold tracking-tight">
-        <span className="text-teal-500">Eco</span>Venture
+        <span className="text-eco">Eco</span>Venture
       </span>
       <span className="text-[10px] tracking-[.25em] uppercase text-white/60 mb-1 hidden sm:block">
         Adventure Travels

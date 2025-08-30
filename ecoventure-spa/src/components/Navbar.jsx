@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link, NavLink } from "react-router-dom";
 
 const nav = [
@@ -11,14 +11,24 @@ const nav = [
 
 export default function Navbar({ onToggleSearch = () => {} }) {
   const [open, setOpen] = useState(false);
+  const [darkMode, setDarkMode] = useState(false);
+
+  // Apply dark mode to <html>
+  useEffect(() => {
+    if (darkMode) {
+      document.documentElement.classList.add("dark");
+    } else {
+      document.documentElement.classList.remove("dark");
+    }
+  }, [darkMode]);
 
   return (
-    <header className="sticky top-0 z-40 bg-white border-b">
-      <div className="max-w-7xl mx-auto px-4 md:px-6 h-16 flex items-center justify-between my-2">
+    <header className="sticky top-0 z-40 bg-white dark:bg-gray-900 border-b dark:border-gray-700">
+      <div className="max-w-7xl mx-auto px-4 md:px-6 h-16 flex items-center justify-between my-0">
         {/* Left: Logo + mobile menu */}
         <div className="flex items-center gap-3">
           <button
-            className="md:hidden p-2 rounded hover:bg-gray-100"
+            className="md:hidden p-2 rounded hover:bg-gray-100 dark:hover:bg-gray-800"
             aria-label="Open menu"
             onClick={() => setOpen(v => !v)}
           >
@@ -28,14 +38,15 @@ export default function Navbar({ onToggleSearch = () => {} }) {
           </button>
 
           <Link to="/" className="flex items-end gap-2">
-            <span className="text-2xl font-extrabold tracking-tight text-gray-800">
-              <span className="text-teal-600">Eco</span>Venture
+            <span className="text-2xl font-extrabold tracking-tight text-gray-800 dark:text-white">
+              <span className="text-eco">Eco</span>Venture
             </span>
-            <span className="text-[10px] tracking-[.25em] uppercase text-gray-500 mb-2 mx-2 hidden sm:block">
+            <span className="text-[10px] tracking-[.25em] uppercase text-gray-500 dark:text-gray-400 mb-2 mx-2 hidden sm:block">
               Adventure Travels
             </span>
           </Link>
         </div>
+
         {/* Center nav (desktop) */}
         <nav className="hidden md:flex items-center gap-7 lg:gap-10">
           {nav.map((item) => (
@@ -44,7 +55,7 @@ export default function Navbar({ onToggleSearch = () => {} }) {
               to={item.to}
               className={({ isActive }) =>
                 [
-                  "whitespace-pre text-[15px] text-gray-700 hover:text-teal-600 transition-colors pb-3 mt-3",
+                  "whitespace-pre text-[15px] text-gray-700 dark:text-gray-200 hover:text-eco transition-colors pb-3 mt-3",
                   isActive ? "text-teal-600 border-b-2 border-teal-500" : "border-b-2 border-transparent"
                 ].join(" ")
               }
@@ -56,7 +67,7 @@ export default function Navbar({ onToggleSearch = () => {} }) {
 
         {/* Right controls */}
         <div className="flex items-center gap-3">
-          {/* Search (calls parent to toggle panel) */}
+          {/* Search */}
           <button
             type="button"
             onClick={onToggleSearch}
@@ -71,7 +82,7 @@ export default function Navbar({ onToggleSearch = () => {} }) {
           </button>
 
           {/* Phone number */}
-          <a href="tel:+442039930013" className="hidden sm:flex items-center gap-2 text-teal-600 font-semibold">
+          <a href="tel:+442039930013" className="hidden sm:flex items-center gap-2 text-eco font-semibold">
             <span className="inline-flex">
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden>
                 <path d="M22 16.92v2a2 2 0 0 1-2.18 2c-9.1-1-16.36-8.26-17.36-17.36A2 2 0 0 1 4.46 1.4h2a2 2 0 0 1 2 1.72c.12.9.34 1.77.66 2.6a2 2 0 0 1-.45 2.11L8 9a16 16 0 0 0 7 7l1.17-1.17a2 2 0 0 1 2.11-.45c.83.32 1.7.54 2.6.66A2 2 0 0 1 22 16.92z"
@@ -84,31 +95,28 @@ export default function Navbar({ onToggleSearch = () => {} }) {
           {/* CTA */}
           <Link
             to="/contact"
-            className="hidden sm:inline-flex items-center justify-center rounded-xl bg-teal-600 text-white px-2 py-2 font-semibold shadow hover:bg-teal-700"
+            className="hidden sm:inline-flex items-center justify-center rounded-xl bg-eco text-white px-2 py-2 font-semibold shadow hover:bg-eco/80 focus:outline-none focus:ring-2 focus:ring-white"
           >
             ASK A QUESTION
           </Link>
 
-          {/* Language flag */}
-          <button className="hidden sm:inline-flex items-center gap-2 border rounded-lg px-2 py-1 hover:bg-gray-50" aria-label="Language">
-            <span className="w-6 h-4 overflow-hidden rounded-[3px] shadow-inner">
-              <svg viewBox="0 0 60 40" width="24" height="16" aria-hidden>
-                <rect width="60" height="40" fill="#012169"/>
-                <path d="M0,0 60,40 M60,0 0,40" stroke="#fff" strokeWidth="8"/>
-                <path d="M0,0 60,40 M60,0 0,40" stroke="#C8102E" strokeWidth="4"/>
-                <path d="M30,0 v40 M0,20 h60" stroke="#fff" strokeWidth="10"/>
-                <path d="M30,0 v40 M0,20 h60" stroke="#C8102E" strokeWidth="6"/>
-              </svg>
-            </span>
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" className="text-gray-500" aria-hidden>
-              <path d="M6 9l6 6 6-6" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
-            </svg>
+          {/* GBP button → Dark mode toggle */}
+          <button
+            onClick={() => setDarkMode(!darkMode)}
+            className="hidden sm:inline-flex items-center gap-2 border rounded-lg px-2 py-1 hover:bg-gray-50 dark:hover:bg-gray-800"
+            aria-label="Toggle dark mode"
+          >
+            {darkMode ? (
+              <span className="text-yellow-400 font-bold">Light</span>
+            ) : (
+              <span className="text-gray-800 dark:text-gray-200 font-bold">Dark</span>
+            )}
           </button>
         </div>
       </div>
 
       {/* Mobile drawer */}
-      <div className={`md:hidden border-t bg-white ${open ? "block" : "hidden"}`}>
+      <div className={`md:hidden border-t bg-white dark:bg-gray-900 ${open ? "block" : "hidden"}`}>
         <nav className="px-4 py-3 grid gap-3">
           {nav.map((item) => (
             <NavLink
@@ -117,7 +125,7 @@ export default function Navbar({ onToggleSearch = () => {} }) {
               onClick={() => setOpen(false)}
               className={({ isActive }) =>
                 [
-                  "py-2 text-gray-700 rounded hover:bg-gray-50",
+                  "py-2 text-gray-700 dark:text-gray-200 rounded hover:bg-gray-50 dark:hover:bg-gray-800",
                   isActive ? "text-teal-600 font-semibold" : ""
                 ].join(" ")
               }
