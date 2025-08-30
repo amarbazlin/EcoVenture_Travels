@@ -13,6 +13,17 @@ self.addEventListener("install", event => {
     caches.open(CACHE_NAME).then(cache => cache.addAll(urlsToCache))
   );
 });
+self.addEventListener("push", event => {
+  const data = event.data ? event.data.json() : {};
+  const title = data.title || "EcoVenture Update!";
+  const options = {
+    body: data.body || "A new tour is now available.",
+    icon: "/icons/tour-icon.png",
+    badge: "/icons/tour-badge.png"
+  };
+  event.waitUntil(self.registration.showNotification(title, options));
+});
+
 
 // Activate event → clean old caches
 self.addEventListener("activate", event => {

@@ -56,7 +56,7 @@ export default function Navbar({ onToggleSearch = () => {} }) {
               className={({ isActive }) =>
                 [
                   "whitespace-pre text-[15px] text-gray-700 dark:text-gray-200 hover:text-eco transition-colors pb-3 mt-3",
-                  isActive ? "text-teal-600 border-b-2 border-teal-500" : "border-b-2 border-transparent"
+                  isActive ? "text-eco border-b-2 border-eco" : "border-b-2 border-transparent"
                 ].join(" ")
               }
             >
@@ -89,7 +89,7 @@ export default function Navbar({ onToggleSearch = () => {} }) {
                       stroke="#0d9488" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
               </svg>
             </span>
-            <span>020 3939 0013</span>
+            <span>020 390 0013</span>
           </a>
 
           {/* CTA */}
@@ -103,7 +103,7 @@ export default function Navbar({ onToggleSearch = () => {} }) {
           {/* GBP button → Dark mode toggle */}
           <button
             onClick={() => setDarkMode(!darkMode)}
-            className="hidden sm:inline-flex items-center gap-2 border rounded-lg px-2 py-1 hover:bg-gray-50 dark:hover:bg-gray-800"
+            className="hidden sm:inline-flex items-center gap-2 border rounded-xl px-2 py-2 hover:bg-gray-50 dark:hover:bg-gray-800"
             aria-label="Toggle dark mode"
           >
             {darkMode ? (
