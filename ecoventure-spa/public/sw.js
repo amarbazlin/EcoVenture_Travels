@@ -37,6 +37,7 @@ self.addEventListener("activate", event => {
 });
 
 // Fetch event → network first for JSON, cache first for static
+// Fetch event → network first for JSON, cache first for static
 self.addEventListener("fetch", event => {
   if (event.request.url.includes(".json")) {
     // Network first (for dynamic tour data)
@@ -44,11 +45,32 @@ self.addEventListener("fetch", event => {
       fetch(event.request).catch(() => caches.match(event.request))
     );
   } else {
-    // Cache first (for static assets)
+    // Cache first, then network, and cache the new response
     event.respondWith(
-      caches.match(event.request).then(response =>
-        response || fetch(event.request)
-      )
+      caches.match(event.request).then(response => {
+        // If the resource is in the cache, return it
+        if (response) {
+          return response;
+        }
+
+        // If not, fetch it from the network
+        return fetch(event.request).then(networkResponse => {
+          // Check if we received a valid response
+          if (!networkResponse || networkResponse.status !== 200 || networkResponse.type !== 'basic') {
+            return networkResponse;
+          }
+
+          // Important: Clone the response because it's a stream
+          const responseToCache = networkResponse.clone();
+
+          caches.open(CACHE_NAME)
+            .then(cache => {
+              cache.put(event.request, responseToCache);
+            });
+
+          return networkResponse;
+        });
+      })
     );
   }
 });
