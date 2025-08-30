@@ -92,7 +92,7 @@ export default function Home({ showSearch, onToggleSearch }) {
             {/* Card 1 */}
             <figure className="relative w-80 h-56 overflow-hidden rounded-2xl shadow">
               <img
-                src="/cycling .webp"   
+                src="/cycling.webp"   
                 alt="Cycling"
                 className="w-full h-full object-cover"
               />
