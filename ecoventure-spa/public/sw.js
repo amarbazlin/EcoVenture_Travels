@@ -5,33 +5,36 @@ const urlsToCache = [
   "/manifest.json",
   "/icons/icon-192.png",
   "/icons/icon-512.png",
-  "/public/categories.json",
+  "/categories.json", // Add this to pre-cache the data file
+  "/Cycling_Vietnam.avif",
+  "/coasta_rica.webp",
+  "/baltics.avif",
+  "/italy.avif",
+  "/croatia.avif",
+  "/sl_cycling.avif",
+  "/nepal_hiking.webp",
+  "/peru_hiking.webp",
+  "/italy_hiking.webp",
+  "/morocco_hiking.webp",
+  "/slovakia_hiking.webp",
+  "/albania_hiking.webp",
+  "/nepal_climbing.webp",
+  "/morocco_climbing.webp",
+  "/protugal_climbing.webp",
+  "/albania_climbing.webp",
+  "/spain_climbing.webp",
+  "/ecuador_climbing.webp",
+  "/montenegro_rafting.webp",
+  "/france_rafting.webp",
+  "/croatia_rafting.webp",
+  "/greece_swim.webp",
+  "/uk_swim.webp",
+  "/finland_swim.webp",
+  "/italy_wild.webp",
+  "/ecuador_wild.webp",
+  "/romania_wild.webp",
+  "/malaysia_wild.webp"
 ];
-self.addEventListener("install", event => {
-  event.waitUntil(
-    caches.open(CACHE_NAME).then(cache => {
-      // First, add the basic assets
-      return cache.addAll(urlsToCache)
-        .then(() => {
-          // Now, fetch the JSON and get image URLs
-          return fetch('/public/categories.json')
-            .then(response => response.json())
-            .then(data => {
-              const imageUrls = [];
-              data.categories.forEach(category => {
-                category.tours.forEach(tour => {
-                  if (tour.image) {
-                    imageUrls.push(tour.image);
-                  }
-                });
-              });
-              // Add all the extracted image URLs to the cache
-              return cache.addAll(imageUrls);
-            });
-        });
-    })
-  );
-});
 
 // Install event → cache essential assets
 self.addEventListener("install", event => {
