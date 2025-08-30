@@ -15,7 +15,7 @@ export default function Home({ showSearch, onToggleSearch }) {
           loop
           muted
           playsInline
-          poster="/hero.jpg"
+          poster="/hero.webp"
         />
 
         {/* Dark overlay for readability */}
