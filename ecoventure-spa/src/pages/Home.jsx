@@ -80,11 +80,12 @@ export default function Home({ showSearch, onToggleSearch }) {
         <div className="max-w-6xl mx-auto px-4 mb-10">
           <div className="flex flex-col md:flex-row items-center justify-center gap-6 ">
             {[
-              { src: "/cycle.webp", label: "Cycling" },
+              { src: "/cycle.webp", label: "Cycling",  },
               { src: "/hiking.webp", label: "Hiking" },
               { src: "/mountain_climb.avif", label: "Mountain Climbing" }
               
             ].map((a) => (
+               <Link key={a.label} to={`/activities?activity=${a.label}`} >
               <figure
                 key={a.label}
                 className="relative w-80 h-56 overflow-hidden rounded-2xl shadow"
@@ -94,7 +95,8 @@ export default function Home({ showSearch, onToggleSearch }) {
                   {a.label}
                 </figcaption>
               </figure>
-            ))}
+            </Link>
+          ))}
           </div>
           
         </div>
@@ -102,10 +104,11 @@ export default function Home({ showSearch, onToggleSearch }) {
           <div className="flex flex-col md:flex-row items-center justify-center gap-6 ">
             {[
               { src: "/Wild_swimming.webp", label: "Wild Swimming" },
-              { src: "/wildlife.webp", label: "Wild Watching" },
+              { src: "/wildlife.webp", label: "Wild Watching"  },
               { src: "/rafting.webp", label: "Rafting" }
               
             ].map((a) => (
+              <Link key={a.label} to={`/activities?activity=${a.label}`}>
               <figure
                 key={a.label}
                 className="relative w-80 h-56 overflow-hidden rounded-2xl shadow"
@@ -115,6 +118,7 @@ export default function Home({ showSearch, onToggleSearch }) {
                   {a.label}
                 </figcaption>
               </figure>
+              </Link>
             ))}
           </div>
           
