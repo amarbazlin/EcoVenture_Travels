@@ -22,9 +22,33 @@ function showTourUpdateNotification(tourName) {
   }
 }
 
+// ✅ Show wishlist notification
+function showWishlistNotification(tourName, isAdded) {
+  if ("Notification" in window && Notification.permission === "granted") {
+    new Notification("EcoVenture Wishlist", {
+      body: isAdded ? `${tourName} added to wishlist!` : `${tourName} removed from wishlist!`,
+      icon: "/icons/icon-192x192.png",
+    });
+  }
+}
+
 export default function Activities() {
   const location = useLocation();
   const navigate = useNavigate();
+
+  // ✅ Wishlist state with localStorage persistence
+  const [wishlist, setWishlist] = useState(() => {
+    try {
+      const saved = localStorage.getItem("ecoventure-wishlist");
+      return saved ? JSON.parse(saved) : [];
+    } catch (error) {
+      console.error("Failed to load wishlist:", error);
+      return [];
+    }
+  });
+
+  const [showWishlistMessage, setShowWishlistMessage] = useState(false);
+  const [wishlistMessage, setWishlistMessage] = useState("");
 
   const activities = useMemo(() => data.categories.map((c) => c.name), []);
   const qs = new URLSearchParams(location.search);
@@ -57,8 +81,46 @@ export default function Activities() {
     }
   }, [tours]);
 
+  // ✅ Save wishlist to localStorage whenever it changes
+  useEffect(() => {
+    localStorage.setItem("ecoventure-wishlist", JSON.stringify(wishlist));
+  }, [wishlist]);
+
+  // ✅ Add to wishlist function
+  const addToWishlist = (tour) => {
+    const isAlreadyInWishlist = wishlist.some(item => item.id === tour.id);
+    
+    if (isAlreadyInWishlist) {
+      // Remove from wishlist
+      setWishlist(prev => prev.filter(item => item.id !== tour.id));
+      setWishlistMessage(`${tour.name} removed from wishlist!`);
+      showWishlistNotification(tour.name, false);
+    } else {
+      // Add to wishlist
+      setWishlist(prev => [...prev, { ...tour, category: active }]);
+      setWishlistMessage(`${tour.name} added to wishlist!`);
+      showWishlistNotification(tour.name, true);
+    }
+    
+    // Show message
+    setShowWishlistMessage(true);
+    setTimeout(() => setShowWishlistMessage(false), 3000);
+  };
+
+  // ✅ Check if tour is in wishlist
+  const isInWishlist = (tourId) => {
+    return wishlist.some(item => item.id === tourId);
+  };
+
   return (
     <section className="max-w-8xl mx-auto px-20 md:px-20 py-10 bg-white dark:bg-gray-900 transition-colors">
+      {/* ✅ Wishlist notification */}
+      {showWishlistMessage && (
+        <div className="fixed top-20 right-4 bg-eco text-white px-6 py-3 rounded-lg shadow-lg z-50 transition-all duration-300">
+          {wishlistMessage}
+        </div>
+      )}
+
       {/* Pills */}
       <div className="rounded-2xl border bg-white dark:bg-gray-800 px-3 md:px-6 py-3 md:py-4 flex flex-wrap gap-3 justify-center">
         {activities.map((name) => (
@@ -88,7 +150,13 @@ export default function Activities() {
       ) : (
         <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
           {tours.map((t) => (
-            <TourCard key={t.id} tour={t} categoryName={active} />
+            <TourCard 
+              key={t.id} 
+              tour={t} 
+              categoryName={active}
+              onAddToWishlist={addToWishlist}
+              isInWishlist={isInWishlist(t.id)}
+            />
           ))}
         </div>
       )}
@@ -96,7 +164,7 @@ export default function Activities() {
   );
 }
 
-function TourCard({ tour, categoryName }) {
+function TourCard({ tour, categoryName, onAddToWishlist, isInWishlist }) {
   const hasOffer = typeof tour.oldPrice === "number";
 
   return (
@@ -107,6 +175,28 @@ function TourCard({ tour, categoryName }) {
           alt={tour.name}
           className="w-full h-full object-cover"
         />
+        
+        {/* ✅ Heart icon for wishlist */}
+        <button
+          onClick={(e) => {
+            e.preventDefault();
+            onAddToWishlist(tour);
+          }}
+          className="absolute top-4 right-4 p-2 rounded-full bg-black/20 backdrop-blur-sm hover:bg-black/40 transition-all"
+          aria-label={isInWishlist ? "Remove from wishlist" : "Add to wishlist"}
+        >
+          <svg 
+            width="24" 
+            height="24" 
+            viewBox="0 0 24 24" 
+            fill={isInWishlist ? "#ef4444" : "none"}
+            stroke={isInWishlist ? "#ef4444" : "white"}
+            strokeWidth="2"
+          >
+            <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
+          </svg>
+        </button>
+
         <h3 className="absolute left-4 bottom-6 right-16 text-white text-xl md:text-2xl font-semibold drop-shadow">
           {tour.name}
         </h3>
