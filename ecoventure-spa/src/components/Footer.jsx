@@ -1,9 +1,8 @@
+import { Link } from "react-router-dom";
+
 export default function Footer() {
   return (
     <footer className="bg-white">
-
-
-
       {/* ===== MOUNTAIN RIDGES + PURPOSE BAND (exact look) ===== */}
       <div className="relative">
         {/* upper torn ridge */}
@@ -58,7 +57,7 @@ function Feature({ iconSrc, title, text }) {
   );
 }
 
-/** Slightly more jagged “torn paper” ridge */
+/** Slightly more jagged "torn paper" ridge */
 function Ridge({ className = "", height = "h-10" }) {
   return (
     <svg
@@ -116,8 +115,13 @@ function DarkFooter() {
           <LinkCol title="Customers" links={["Contact Us","Help & FAQs","Travel Advice","Cookies","Terms & Conditions"]}/>
           <LinkCol title="Travel Companies" links={["Host Knowledge Base","Apply to Host"]}/>
           <div>
-            <h4 className="text-sm font-extrabold tracking-widest uppercase mb-4">Partners</h4>
-            <a href="#" className="inline-flex items-center justify-center border border-white/20 rounded-lg px-4 py-2 text-sm hover:bg-white/10">GBP</a>
+            <h4 className="text-sm font-extrabold tracking-widest uppercase mb-4">Admin</h4>
+            <Link 
+              to="/admin/login" 
+              className="inline-flex items-center justify-center border border-white/20 rounded-lg px-4 py-2 text-sm hover:bg-white/10 transition-colors"
+            >
+              Admin Login
+            </Link>
           </div>
         </div>
       </div>
@@ -149,6 +153,7 @@ function Badge({ children }) {
     </span>
   );
 }
+
 function LinkCol({ title, links = [] }) {
   return (
     <div>
@@ -161,6 +166,7 @@ function LinkCol({ title, links = [] }) {
     </div>
   );
 }
+
 function Logo() {
   return (
     <div className="flex items-end gap-2">
@@ -173,6 +179,7 @@ function Logo() {
     </div>
   );
 }
+
 function Social({ icon }) {
   const paths = {
     facebook: "M15 3h-3a4 4 0 00-4 4v3H5v4h3v7h4v-7h3l1-4h-4V7a1 1 0 011-1h3V3z",

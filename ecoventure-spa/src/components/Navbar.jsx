@@ -160,13 +160,22 @@ export default function Navbar({ onToggleSearch = () => {} }) {
               {item.label.replace("\n", " ")}
             </NavLink>
           ))}
-          <Link
-            to="/contact"
-            className="mt-1 inline-flex items-center justify-center rounded-lg bg-teal-600 text-white px-4 py-2 font-semibold"
-            onClick={() => setOpen(false)}
-          >
-            ASK A QUESTION
-          </Link>
+          <div className="flex items-center gap-2 mt-1">
+            <Link
+              to="/contact"
+              className="inline-flex items-center justify-center rounded-lg bg-teal-600 text-white px-4 py-2 font-semibold flex-grow"
+              onClick={() => setOpen(false)}
+            >
+              ASK A QUESTION
+            </Link>
+            <button
+              onClick={() => setDarkMode(!darkMode)}
+              className="inline-flex items-center justify-center rounded-lg border border-gray-200 dark:border-gray-700 text-gray-800 dark:text-gray-200 px-4 py-2 font-semibold"
+              aria-label="Toggle dark mode"
+            >
+              {darkMode ? "Light" : "Dark"}
+            </button>
+          </div>
         </nav>
       </div>
     </header>

@@ -1,14 +1,16 @@
 // App.jsx
 import { useState } from "react";
-import { Routes, Route } from "react-router-dom";
+import { Routes, Route } from 'react-router-dom';
 import Navbar from "./components/Navbar";
 import Home from "./pages/Home";
 import Activities from "./pages/Activities";
-import Wishlist from "./pages/Wishlist"; 
+import Wishlist from "./pages/Wishlist";
 import ToursByCategory from "./pages/ToursByCategory";
 import TourDetails from "./pages/TourDetails";
 import SearchFiltersOverlay from "./components/SearchFilters";
 import Footer from "./components/Footer";
+import Login from './pages/Login';
+import AdminDashboard from './pages/AdminDashboard';
 
 export default function App() {
   const [showSearch, setShowSearch] = useState(false);
@@ -25,9 +27,11 @@ export default function App() {
       
       <main>
         <Routes>
+          <Route path="/admin/login" element={<Login />} />
+          <Route path="/admin/dashboard" element={<AdminDashboard />} />
           <Route path="/" element={<Home />} />
           <Route path="/activities" element={<Activities />} />
-          <Route path="/wishlist" element={<Wishlist />} /> {/* ✅ Added Wishlist route */}
+          <Route path="/wishlist" element={<Wishlist />} />
           <Route path="/categories/:categoryId" element={<ToursByCategory />} />
           <Route path="/tour/:tourId" element={<TourDetails />} />
         </Routes>
