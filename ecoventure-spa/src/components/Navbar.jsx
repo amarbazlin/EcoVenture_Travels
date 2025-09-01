@@ -4,9 +4,9 @@ import { Link, NavLink } from "react-router-dom";
 const nav = [
   { to: "/destinations", label: "Destinations" },
   { to: "/activities",   label: "Activities" },
-  { to: "/last-minute",  label: "Last Minute\nHolidays" },
   { to: "/offers",       label: "Offers" },
   { to: "/blog",         label: "Blog" },
+  { to: "/wishlist",     label: "Wishlist" }, 
 ];
 
 export default function Navbar({ onToggleSearch = () => {} }) {
@@ -55,11 +55,25 @@ export default function Navbar({ onToggleSearch = () => {} }) {
               to={item.to}
               className={({ isActive }) =>
                 [
-                  "whitespace-pre text-[15px] text-gray-700 dark:text-gray-200 hover:text-eco transition-colors pb-3 mt-3",
+                  "whitespace-pre text-[15px] text-gray-700 dark:text-gray-200 hover:text-eco transition-colors pb-3 mt-3 flex items-center gap-1",
                   isActive ? "text-eco border-b-2 border-eco" : "border-b-2 border-transparent"
                 ].join(" ")
               }
             >
+              {/* ✅ Add heart icon for Wishlist */}
+              {item.to === "/wishlist" && (
+                <svg 
+                  width="16" 
+                  height="16" 
+                  viewBox="0 0 24 24" 
+                  fill="none" 
+                  stroke="currentColor" 
+                  strokeWidth="2"
+                  className="mr-1"
+                >
+                  <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
+                </svg>
+              )}
               {item.label}
             </NavLink>
           ))}
@@ -125,21 +139,43 @@ export default function Navbar({ onToggleSearch = () => {} }) {
               onClick={() => setOpen(false)}
               className={({ isActive }) =>
                 [
-                  "py-2 text-gray-700 dark:text-gray-200 rounded hover:bg-gray-50 dark:hover:bg-gray-800",
+                  "py-2 text-gray-700 dark:text-gray-200 rounded hover:bg-gray-50 dark:hover:bg-gray-800 flex items-center gap-2",
                   isActive ? "text-teal-600 font-semibold" : ""
                 ].join(" ")
               }
             >
+              {/* ✅ Add heart icon for mobile Wishlist */}
+              {item.to === "/wishlist" && (
+                <svg 
+                  width="16" 
+                  height="16" 
+                  viewBox="0 0 24 24" 
+                  fill="none" 
+                  stroke="currentColor" 
+                  strokeWidth="2"
+                >
+                  <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
+                </svg>
+              )}
               {item.label.replace("\n", " ")}
             </NavLink>
           ))}
-          <Link
-            to="/contact"
-            className="mt-1 inline-flex items-center justify-center rounded-lg bg-teal-600 text-white px-4 py-2 font-semibold"
-            onClick={() => setOpen(false)}
-          >
-            ASK A QUESTION
-          </Link>
+          <div className="flex items-center gap-2 mt-1">
+            <Link
+              to="/contact"
+              className="inline-flex items-center justify-center rounded-lg bg-teal-600 text-white px-4 py-2 font-semibold flex-grow"
+              onClick={() => setOpen(false)}
+            >
+              ASK A QUESTION
+            </Link>
+            <button
+              onClick={() => setDarkMode(!darkMode)}
+              className="inline-flex items-center justify-center rounded-lg border border-gray-200 dark:border-gray-700 text-gray-800 dark:text-gray-200 px-4 py-2 font-semibold"
+              aria-label="Toggle dark mode"
+            >
+              {darkMode ? "Light" : "Dark"}
+            </button>
+          </div>
         </nav>
       </div>
     </header>
