@@ -21,6 +21,14 @@ export default function AdminDashboard() {
     baseSlots: "12"
   });
 
+  const getAuthHeaders = () => {
+  const token = localStorage.getItem("jwt_token");
+  return {
+    "Content-Type": "application/json",
+    ...(token && { Authorization: `Bearer ${token}` })
+  };
+};
+
   // Check authentication on component mount
   useEffect(() => {
     const isLoggedIn = localStorage.getItem("admin_logged_in");
@@ -98,10 +106,11 @@ export default function AdminDashboard() {
   };
 
   const handleLogout = () => {
-    localStorage.removeItem("admin_logged_in");
-    localStorage.removeItem("admin_email");
-    navigate("/admin/login");
-  };
+  localStorage.removeItem("admin_logged_in");
+  localStorage.removeItem("admin_email");
+  localStorage.removeItem("jwt_token"); // Add this line
+  navigate("/admin/login");
+};
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -134,102 +143,119 @@ export default function AdminDashboard() {
   };
 
   const handleAddTour = async (e) => {
-    e.preventDefault();
-    setLoading(true);
-    setError(null);
+  e.preventDefault();
+  setLoading(true);
+  setError(null);
+  
+  // Validation
+  if (!newTour.name || !newTour.country || !newTour.description || !newTour.days || !newTour.price || !newTour.category) {
+    alert("Please fill in all required fields");
+    setLoading(false);
+    return;
+  }
+
+  try {
+    console.log("Adding new tour:", newTour);
     
-    // Validation
-    if (!newTour.name || !newTour.country || !newTour.description || !newTour.days || !newTour.price || !newTour.category) {
-      alert("Please fill in all required fields");
-      setLoading(false);
-      return;
-    }
+    const response = await fetch("http://localhost:4000/api/tours", {
+      method: "POST",
+      headers: getAuthHeaders(),
+      body: JSON.stringify({
+        name: newTour.name,
+        country: newTour.country,
+        category: newTour.category,
+        description: newTour.description,
+        image: newTour.image || "/default-tour.jpg",
+        days: Number(newTour.days),
+        price: Number(newTour.price),
+        oldPrice: newTour.oldPrice ? Number(newTour.oldPrice) : null,
+        baseSlots: Number(newTour.baseSlots)
+      }),
+    });
 
-    try {
-      console.log("Adding new tour:", newTour);
-      
-      const response = await fetch("http://localhost:4000/api/tours", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          name: newTour.name,
-          country: newTour.country,
-          category: newTour.category,
-          description: newTour.description,
-          image: newTour.image || "/default-tour.jpg",
-          days: Number(newTour.days),
-          price: Number(newTour.price),
-          oldPrice: newTour.oldPrice ? Number(newTour.oldPrice) : null,
-          baseSlots: Number(newTour.baseSlots)
-        }),
-      });
+    const data = await response.json();
+    console.log("Add tour response:", data);
 
-      const data = await response.json();
-      console.log("Add tour response:", data);
-
-      if (!response.ok || !data.success) {
-        throw new Error(data.error || data.message || "Failed to add tour");
+    if (!response.ok || !data.success) {
+      // Check if it's an auth error
+      if (response.status === 401 || response.status === 403) {
+        alert("Session expired. Please login again.");
+        localStorage.removeItem("jwt_token");
+        localStorage.removeItem("admin_logged_in");
+        navigate("/admin/login");
+        return;
       }
-
-      // Show success notification
-      showNotification(`New tour "${newTour.name}" added successfully!`);
-      alert(`Tour "${newTour.name}" added successfully!`);
-
-      // Reset form
-      setNewTour({
-        name: "",
-        country: "",
-        image: "",
-        description: "",
-        days: "",
-        price: "",
-        oldPrice: "",
-        category: categories[0]?.categoryKey || "",
-        baseSlots: "12"
-      });
-      setShowAddForm(false);
-
-      // Reload tours to show the new one
-      await loadTours();
-
-    } catch (error) {
-      console.error("Failed to add tour:", error);
-      setError("Failed to add tour: " + error.message);
-      alert("Failed to add tour: " + error.message);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleDeleteTour = async (tourId, tourName) => {
-    if (!confirm(`Are you sure you want to delete "${tourName}"?`)) {
-      return;
+      throw new Error(data.error || data.message || "Failed to add tour");
     }
 
-    try {
-      const response = await fetch(`http://localhost:4000/api/tours/${tourId}`, {
-        method: "DELETE",
-      });
+    // Show success notification
+    showNotification(`New tour "${newTour.name}" added successfully!`);
+    alert(`Tour "${newTour.name}" added successfully!`);
 
-      const data = await response.json();
+    // Reset form
+    setNewTour({
+      name: "",
+      country: "",
+      image: "",
+      description: "",
+      days: "",
+      price: "",
+      oldPrice: "",
+      category: categories[0]?.categoryKey || "",
+      baseSlots: "12"
+    });
+    setShowAddForm(false);
 
-      if (!response.ok || !data.success) {
-        throw new Error(data.error || "Failed to delete tour");
+    // Reload tours to show the new one
+    await loadTours();
+
+  } catch (error) {
+    console.error("Failed to add tour:", error);
+    setError("Failed to add tour: " + error.message);
+    alert("Failed to add tour: " + error.message);
+  } finally {
+    setLoading(false);
+  }
+};
+
+
+const handleDeleteTour = async (tourId, tourName) => {
+  if (!confirm(`Are you sure you want to delete "${tourName}"?`)) {
+    return;
+  }
+
+  try {
+    const response = await fetch(`http://localhost:4000/api/tours/${tourId}`, {
+      method: "DELETE",
+      headers: getAuthHeaders()
+    });
+
+    const data = await response.json();
+
+    if (!response.ok || !data.success) {
+      // Check if it's an auth error
+      if (response.status === 401 || response.status === 403) {
+        alert("Session expired. Please login again.");
+        localStorage.removeItem("jwt_token");
+        localStorage.removeItem("admin_logged_in");
+        navigate("/admin/login");
+        return;
       }
-
-      showNotification(`Tour "${tourName}" deleted successfully!`);
-      alert(`Tour "${tourName}" deleted successfully!`);
-
-      // Reload tours
-      await loadTours();
-
-    } catch (error) {
-      console.error("Failed to delete tour:", error);
-      alert("Failed to delete tour: " + error.message);
+      throw new Error(data.error || "Failed to delete tour");
     }
-  };
+
+    showNotification(`Tour "${tourName}" deleted successfully!`);
+    alert(`Tour "${tourName}" deleted successfully!`);
+
+    // Reload tours
+    await loadTours();
+
+  } catch (error) {
+    console.error("Failed to delete tour:", error);
+    alert("Failed to delete tour: " + error.message);
+  }
+};
+
 
   // Group tours by category for display
   const toursByCategory = useMemo(() => {
@@ -284,7 +310,7 @@ export default function AdminDashboard() {
         <div className="max-w-7xl mx-auto px-4 md:px-6 py-4 flex items-center justify-between">
           <div className="flex items-center gap-4">
             <div className="flex items-end gap-2">
-              <h1 className="text-2xl font-bold text-eco">EcoVenture</h1>
+              
               <span className="text-xs text-gray-500 mb-1">Admin Dashboard</span>
             </div>
           </div>

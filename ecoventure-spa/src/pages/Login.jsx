@@ -10,8 +10,10 @@ export default function Login() {
 
   // Check if already logged in
   useEffect(() => {
+    const token = localStorage.getItem("jwt_token");
     const isLoggedIn = localStorage.getItem("admin_logged_in");
-    if (isLoggedIn === "true") {
+    
+    if (token && isLoggedIn === "true") {
       navigate("/admin/dashboard");
     }
   }, [navigate]);
@@ -22,19 +24,31 @@ export default function Login() {
     setError("");
 
     try {
-      // Fetch admin credentials from JSON file
-      const response = await fetch("/admin_credentials.json");
-      const adminData = await response.json();
+      console.log("Attempting login with:", { email });
+      
+      const response = await fetch("http://localhost:4000/auth/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, password }),
+      });
 
-      // Check credentials
-      if (email === adminData.admin.email && password === adminData.admin.password) {
+      console.log("Login response status:", response.status);
+      const data = await response.json();
+      console.log("Login response data:", data);
+
+      if (response.ok && data.success) {
+        // Save JWT token and set logged-in flag
+        localStorage.setItem("jwt_token", data.token);
         localStorage.setItem("admin_logged_in", "true");
         localStorage.setItem("admin_email", email);
+        
+        console.log("Login successful, navigating to dashboard");
         navigate("/admin/dashboard");
       } else {
-        setError("Invalid email or password");
+        setError(data.error || "Invalid email or password");
       }
     } catch (err) {
+      console.error("Login error:", err);
       setError("Failed to authenticate. Please try again.");
     } finally {
       setLoading(false);

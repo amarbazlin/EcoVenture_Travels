@@ -1,8 +1,10 @@
-// server.js - Main Express server with MySQL integration
+// server.js - Main Express server with MySQL integration and Authentication
 const express = require('express');
 const cors = require('cors');
 const dotenv = require('dotenv');
 const path = require('path');
+const jwt = require('jsonwebtoken');
+const fs = require('fs');
 const pool = require('./config/database'); // Use your existing database config
 
 // Load environment variables
@@ -10,6 +12,7 @@ dotenv.config();
 
 const app = express();
 const PORT = process.env.PORT || 4000;
+const JWT_SECRET = process.env.JWT_SECRET || "supersecretkey"; // use .env in production
 
 // Middleware
 app.use(cors({
@@ -23,6 +26,93 @@ app.use(express.urlencoded({ extended: true }));
 
 // Serve static files (images)
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+
+// ============ AUTH MIDDLEWARE ============
+function verifyToken(req, res, next) {
+    const authHeader = req.headers["authorization"];
+    
+    // Debug logging
+    console.log("🔍 Auth Header:", authHeader);
+    
+    if (!authHeader) {
+        return res.status(401).json({ 
+            success: false,
+            error: "No authorization header provided",
+            expected: "Authorization: Bearer <token>"
+        });
+    }
+    
+    const token = authHeader.split(" ")[1]; // Expect "Bearer TOKEN"
+    
+    if (!token) {
+        return res.status(401).json({ 
+            success: false,
+            error: "No token provided",
+            received: authHeader,
+            expected: "Authorization: Bearer <token>"
+        });
+    }
+    
+    console.log("🔑 Token received:", token.substring(0, 20) + "...");
+    
+    jwt.verify(token, JWT_SECRET, (err, decoded) => {
+        if (err) {
+            console.log("❌ Token verification error:", err.message);
+            return res.status(403).json({ 
+                success: false,
+                error: "Invalid token",
+                details: err.message,
+                tokenStart: token.substring(0, 20) + "..."
+            });
+        }
+        
+        console.log("✅ Token verified for user:", decoded.email);
+        req.user = decoded; // e.g. { role: "admin", email: ... }
+        next();
+    });
+}
+
+// ============ AUTH ROUTES ============
+// POST /auth/login
+app.post('/auth/login', (req, res) => {
+    try {
+        const { email, password } = req.body;
+        
+        // Load admin credentials from JSON file
+        const adminCreds = JSON.parse(fs.readFileSync("admin_credentials.json", "utf-8"));
+        
+        if (email === adminCreds.admin.email && password === adminCreds.admin.password) {
+            // Create JWT token
+            const token = jwt.sign({ role: "admin", email }, JWT_SECRET, { expiresIn: "1h" });
+            return res.json({ 
+                success: true, 
+                token,
+                message: "Login successful"
+            });
+        }
+        
+        res.status(401).json({ 
+            success: false, 
+            error: "Invalid email or password" 
+        });
+    } catch (error) {
+        console.error('Login error:', error);
+        res.status(500).json({ 
+            success: false, 
+            error: "Login failed",
+            message: error.message 
+        });
+    }
+});
+
+// POST /auth/verify - Verify token validity
+app.post('/auth/verify', verifyToken, (req, res) => {
+    res.json({
+        success: true,
+        user: req.user,
+        message: "Token is valid"
+    });
+});
 
 // Initialize database tables
 const initializeTables = async () => {
@@ -100,7 +190,7 @@ const generateTourKey = (name, category) => {
     return `${prefix}-${suffix}-${timestamp}`;
 };
 
-// ============ REST API ENDPOINTS ============
+// ============ PUBLIC API ENDPOINTS (No Auth Required) ============
 
 // GET /api/tours - Fetch all tours with optional filtering
 app.get('/api/tours', async (req, res) => {
@@ -144,33 +234,32 @@ app.get('/api/tours', async (req, res) => {
             params.push(searchTerm, searchTerm, searchTerm);
         }
 
-      
-
         // Calculate offset
         const offset = (Number(page) - 1) * Number(limit);
 
         // Get tours with pagination and category info
-    const toursQuery = `
-    SELECT 
-        t.id, 
-        t.tour_key as tourKey,
-        t.name, 
-        t.country, 
-        c.category_key as category,
-        c.name as categoryName,
-        t.description, 
-        t.image_url as image, 
-        t.days, 
-        t.price, 
-        t.old_price as oldPrice,
-        t.rating, 
-        t.reviews, 
-        t.base_slots as baseSlots
-    FROM tours t
-    LEFT JOIN categories c ON t.category_id = c.id
-    ${whereClause}
-    LIMIT ? OFFSET ?
-`;
+        const toursQuery = `
+            SELECT 
+                t.id, 
+                t.tour_key as tourKey,
+                t.name, 
+                t.country, 
+                c.category_key as category,
+                c.name as categoryName,
+                t.description, 
+                t.image_url as image, 
+                t.days, 
+                t.price, 
+                t.old_price as oldPrice,
+                t.rating, 
+                t.reviews, 
+                t.base_slots as baseSlots
+            FROM tours t
+            LEFT JOIN categories c ON t.category_id = c.id
+            ${whereClause}
+           
+            LIMIT ? OFFSET ?
+        `;
         
         const [tours] = await pool.execute(toursQuery, [...params, Number(limit), offset]);
 
@@ -226,7 +315,6 @@ app.get('/api/tours/:id', async (req, res) => {
                 t.rating, 
                 t.reviews, 
                 t.base_slots as baseSlots
-              
             FROM tours t
             LEFT JOIN categories c ON t.category_id = c.id
             WHERE t.id = ? OR t.tour_key = ?
@@ -256,9 +344,103 @@ app.get('/api/tours/:id', async (req, res) => {
     }
 });
 
-// POST /api/tours - Add new tour
-app.post('/api/tours', async (req, res) => {
+// GET /api/categories - Fetch all categories
+app.get('/api/categories', async (req, res) => {
     try {
+        const [categories] = await pool.execute(
+            'SELECT id, category_key as categoryKey, name, description FROM categories ORDER BY name ASC'
+        );
+        res.json({
+            success: true,
+            data: categories
+        });
+    } catch (error) {
+        console.error('Error fetching categories:', error);
+        res.status(500).json({
+            success: false,
+            error: 'Failed to fetch categories'
+        });
+    }
+});
+
+// GET /api/tours/category/:category - Get tours by category
+app.get('/api/tours/category/:category', async (req, res) => {
+    try {
+        const categoryKey = req.params.category.toLowerCase();
+        const [tours] = await pool.execute(
+            `SELECT 
+                t.id, 
+                t.tour_key as tourKey,
+                t.name, 
+                t.country, 
+                c.category_key as category,
+                c.name as categoryName,
+                t.description, 
+                t.image_url as image, 
+                t.days, 
+                t.price, 
+                t.old_price as oldPrice,
+                t.rating, 
+                t.reviews, 
+                t.base_slots as baseSlots
+            FROM tours t
+            LEFT JOIN categories c ON t.category_id = c.id
+            WHERE c.category_key = ? 
+            `,
+            [categoryKey]
+        );
+        
+        res.json({
+            success: true,
+            data: tours,
+            count: tours.length
+        });
+    } catch (error) {
+        console.error('Error fetching tours by category:', error);
+        res.status(500).json({
+            success: false,
+            error: 'Failed to fetch tours by category'
+        });
+    }
+});
+
+// GET /api/stats - Get database statistics
+app.get('/api/stats', async (req, res) => {
+    try {
+        const [tourCount] = await pool.execute('SELECT COUNT(*) as total FROM tours');
+        const [categoryCount] = await pool.execute('SELECT COUNT(*) as total FROM categories');
+        const [countryCount] = await pool.execute('SELECT COUNT(DISTINCT country) as total FROM tours');
+        
+        res.json({
+            success: true,
+            data: {
+                totalTours: tourCount[0].total,
+                totalCategories: categoryCount[0].total,
+                totalCountries: countryCount[0].total
+            }
+        });
+    } catch (error) {
+        console.error('Error fetching stats:', error);
+        res.status(500).json({
+            success: false,
+            error: 'Failed to fetch statistics'
+        });
+    }
+});
+
+// ============ PROTECTED API ENDPOINTS (Auth Required) ============
+
+// POST /api/tours - Add new tour (ADMIN ONLY)
+app.post('/api/tours', verifyToken, async (req, res) => {
+    try {
+        // Check if user is admin
+        if (req.user.role !== 'admin') {
+            return res.status(403).json({
+                success: false,
+                error: 'Admin access required'
+            });
+        }
+
         const {
             name,
             country,
@@ -379,9 +561,17 @@ app.post('/api/tours', async (req, res) => {
     }
 });
 
-// PUT /api/tours/:id - Update tour
-app.put('/api/tours/:id', async (req, res) => {
+// PUT /api/tours/:id - Update tour (ADMIN ONLY)
+app.put('/api/tours/:id', verifyToken, async (req, res) => {
     try {
+        // Check if user is admin
+        if (req.user.role !== 'admin') {
+            return res.status(403).json({
+                success: false,
+                error: 'Admin access required'
+            });
+        }
+
         const identifier = req.params.id;
         const updateFields = [];
         const params = [];
@@ -484,9 +674,17 @@ app.put('/api/tours/:id', async (req, res) => {
     }
 });
 
-// DELETE /api/tours/:id - Delete tour
-app.delete('/api/tours/:id', async (req, res) => {
+// DELETE /api/tours/:id - Delete tour (ADMIN ONLY)
+app.delete('/api/tours/:id', verifyToken, async (req, res) => {
     try {
+        // Check if user is admin
+        if (req.user.role !== 'admin') {
+            return res.status(403).json({
+                success: false,
+                error: 'Admin access required'
+            });
+        }
+
         const identifier = req.params.id;
         const [result] = await pool.execute(
             'DELETE FROM tours WHERE id = ? OR tour_key = ?', 
@@ -511,90 +709,6 @@ app.delete('/api/tours/:id', async (req, res) => {
             success: false,
             error: 'Failed to delete tour',
             message: error.message
-        });
-    }
-});
-
-// GET /api/categories - Fetch all categories
-app.get('/api/categories', async (req, res) => {
-    try {
-        const [categories] = await pool.execute(
-            'SELECT id, category_key as categoryKey, name, description FROM categories ORDER BY name ASC'
-        );
-        res.json({
-            success: true,
-            data: categories
-        });
-    } catch (error) {
-        console.error('Error fetching categories:', error);
-        res.status(500).json({
-            success: false,
-            error: 'Failed to fetch categories'
-        });
-    }
-});
-
-// GET /api/tours/category/:category - Get tours by category
-app.get('/api/tours/category/:category', async (req, res) => {
-    try {
-        const categoryKey = req.params.category.toLowerCase();
-        const [tours] = await pool.execute(
-            `SELECT 
-                t.id, 
-                t.tour_key as tourKey,
-                t.name, 
-                t.country, 
-                c.category_key as category,
-                c.name as categoryName,
-                t.description, 
-                t.image_url as image, 
-                t.days, 
-                t.price, 
-                t.old_price as oldPrice,
-                t.rating, 
-                t.reviews, 
-                t.base_slots as baseSlots
-            FROM tours t
-            LEFT JOIN categories c ON t.category_id = c.id
-            WHERE c.category_key = ? 
-            `,
-            [categoryKey]
-        );
-        
-        res.json({
-            success: true,
-            data: tours,
-            count: tours.length
-        });
-    } catch (error) {
-        console.error('Error fetching tours by category:', error);
-        res.status(500).json({
-            success: false,
-            error: 'Failed to fetch tours by category'
-        });
-    }
-});
-
-// GET /api/stats - Get database statistics
-app.get('/api/stats', async (req, res) => {
-    try {
-        const [tourCount] = await pool.execute('SELECT COUNT(*) as total FROM tours');
-        const [categoryCount] = await pool.execute('SELECT COUNT(*) as total FROM categories');
-        const [countryCount] = await pool.execute('SELECT COUNT(DISTINCT country) as total FROM tours');
-        
-        res.json({
-            success: true,
-            data: {
-                totalTours: tourCount[0].total,
-                totalCategories: categoryCount[0].total,
-                totalCountries: countryCount[0].total
-            }
-        });
-    } catch (error) {
-        console.error('Error fetching stats:', error);
-        res.status(500).json({
-            success: false,
-            error: 'Failed to fetch statistics'
         });
     }
 });
@@ -643,6 +757,7 @@ app.listen(PORT, () => {
     console.log(`🚀 EcoVenture API server running on port ${PORT}`);
     console.log(`📝 Environment: ${process.env.NODE_ENV || 'development'}`);
     console.log(`🔗 Health check: http://localhost:${PORT}/api/health`);
+    console.log(`🔐 Auth endpoint: http://localhost:${PORT}/auth/login`);
 });
 
 module.exports = app;
