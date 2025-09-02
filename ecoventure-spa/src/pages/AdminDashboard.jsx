@@ -1,11 +1,14 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 
 export default function AdminDashboard() {
   const navigate = useNavigate();
   const [categories, setCategories] = useState([]);
+  const [tours, setTours] = useState([]);
   const [showAddForm, setShowAddForm] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [dataLoading, setDataLoading] = useState(true);
+  const [error, setError] = useState(null);
   const [newTour, setNewTour] = useState({
     name: "",
     country: "",
@@ -14,7 +17,8 @@ export default function AdminDashboard() {
     days: "",
     price: "",
     oldPrice: "",
-    category: "cycling"
+    category: "",
+    baseSlots: "12"
   });
 
   // Check authentication on component mount
@@ -25,21 +29,71 @@ export default function AdminDashboard() {
       return;
     }
     
-    // Load categories data
-    loadCategories();
+    // Load initial data
+    loadInitialData();
   }, [navigate]);
+
+  const loadInitialData = async () => {
+    setDataLoading(true);
+    setError(null);
+    
+    try {
+      await Promise.all([loadCategories(), loadTours()]);
+    } catch (error) {
+      console.error("Failed to load initial data:", error);
+      setError("Failed to load dashboard data");
+    } finally {
+      setDataLoading(false);
+    }
+  };
 
   const loadCategories = async () => {
     try {
-      const response = await fetch("/categories.json");
+      console.log("Loading categories from API...");
+      const response = await fetch("http://localhost:4000/api/categories");
+      
       if (!response.ok) {
-        throw new Error('Failed to fetch categories');
+        throw new Error(`HTTP error! status: ${response.status}`);
       }
+      
       const data = await response.json();
-      setCategories(data.categories || []);
+      console.log("Categories API response:", data);
+      
+      if (data.success && data.data) {
+        setCategories(data.data);
+        // Set default category for new tour form
+        if (data.data.length > 0 && !newTour.category) {
+          setNewTour(prev => ({ ...prev, category: data.data[0].categoryKey }));
+        }
+      } else {
+        throw new Error(data.error || "Failed to fetch categories");
+      }
     } catch (error) {
       console.error("Failed to load categories:", error);
-      alert("Failed to load tour categories. Please refresh the page.");
+      setError("Failed to load categories: " + error.message);
+    }
+  };
+
+  const loadTours = async () => {
+    try {
+      console.log("Loading tours from API...");
+      const response = await fetch("http://localhost:4000/api/tours");
+      
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      
+      const data = await response.json();
+      console.log("Tours API response:", data);
+      
+      if (data.success && data.data) {
+        setTours(data.data);
+      } else {
+        throw new Error(data.error || "Failed to fetch tours");
+      }
+    } catch (error) {
+      console.error("Failed to load tours:", error);
+      setError("Failed to load tours: " + error.message);
     }
   };
 
@@ -53,20 +107,10 @@ export default function AdminDashboard() {
     const { name, value } = e.target;
     setNewTour(prev => ({
       ...prev,
-      [name]: name === "days" || name === "price" || name === "oldPrice" 
+      [name]: name === "days" || name === "price" || name === "oldPrice" || name === "baseSlots"
         ? (value === "" ? "" : Number(value))
         : value
     }));
-  };
-
-  const generateTourId = (name, category) => {
-    const prefix = category.toLowerCase().substring(0, 4);
-    const suffix = name.toLowerCase()
-      .replace(/[^a-z0-9\s]/g, "")
-      .replace(/\s+/g, "-")
-      .substring(0, 20);
-    const timestamp = Date.now().toString().slice(-4);
-    return `${prefix}-${suffix}-${timestamp}`;
   };
 
   const showNotification = (message) => {
@@ -92,47 +136,46 @@ export default function AdminDashboard() {
   const handleAddTour = async (e) => {
     e.preventDefault();
     setLoading(true);
+    setError(null);
     
     // Validation
-    if (!newTour.name || !newTour.country || !newTour.description || !newTour.days || !newTour.price) {
+    if (!newTour.name || !newTour.country || !newTour.description || !newTour.days || !newTour.price || !newTour.category) {
       alert("Please fill in all required fields");
       setLoading(false);
       return;
     }
 
     try {
-      // Generate unique ID
-      const tourId = generateTourId(newTour.name, newTour.category);
+      console.log("Adding new tour:", newTour);
       
-      // Create new tour object
-      const tour = {
-        id: tourId,
-        name: newTour.name,
-        country: newTour.country.toUpperCase(),
-        image: newTour.image || "/default-tour.jpg",
-        description: newTour.description,
-        days: Number(newTour.days),
-        price: Number(newTour.price),
-        ...(newTour.oldPrice && { oldPrice: Number(newTour.oldPrice) }),
-        rating: 4.5,
-        reviews: 0
-      };
-
-      // Update categories state
-      const updatedCategories = categories.map(category => {
-        if (category.name.toLowerCase() === newTour.category.toLowerCase()) {
-          return {
-            ...category,
-            tours: [...category.tours, tour]
-          };
-        }
-        return category;
+      const response = await fetch("http://localhost:4000/api/tours", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          name: newTour.name,
+          country: newTour.country,
+          category: newTour.category,
+          description: newTour.description,
+          image: newTour.image || "/default-tour.jpg",
+          days: Number(newTour.days),
+          price: Number(newTour.price),
+          oldPrice: newTour.oldPrice ? Number(newTour.oldPrice) : null,
+          baseSlots: Number(newTour.baseSlots)
+        }),
       });
 
-      setCategories(updatedCategories);
+      const data = await response.json();
+      console.log("Add tour response:", data);
 
-      // Show notification
+      if (!response.ok || !data.success) {
+        throw new Error(data.error || data.message || "Failed to add tour");
+      }
+
+      // Show success notification
       showNotification(`New tour "${newTour.name}" added successfully!`);
+      alert(`Tour "${newTour.name}" added successfully!`);
 
       // Reset form
       setNewTour({
@@ -143,20 +186,72 @@ export default function AdminDashboard() {
         days: "",
         price: "",
         oldPrice: "",
-        category: "cycling"
+        category: categories[0]?.categoryKey || "",
+        baseSlots: "12"
       });
       setShowAddForm(false);
 
-      // Show success message
-      alert(`Tour "${tour.name}" added successfully to ${newTour.category}!`);
+      // Reload tours to show the new one
+      await loadTours();
 
     } catch (error) {
       console.error("Failed to add tour:", error);
-      alert("Failed to add tour. Please try again.");
+      setError("Failed to add tour: " + error.message);
+      alert("Failed to add tour: " + error.message);
     } finally {
       setLoading(false);
     }
   };
+
+  const handleDeleteTour = async (tourId, tourName) => {
+    if (!confirm(`Are you sure you want to delete "${tourName}"?`)) {
+      return;
+    }
+
+    try {
+      const response = await fetch(`http://localhost:4000/api/tours/${tourId}`, {
+        method: "DELETE",
+      });
+
+      const data = await response.json();
+
+      if (!response.ok || !data.success) {
+        throw new Error(data.error || "Failed to delete tour");
+      }
+
+      showNotification(`Tour "${tourName}" deleted successfully!`);
+      alert(`Tour "${tourName}" deleted successfully!`);
+
+      // Reload tours
+      await loadTours();
+
+    } catch (error) {
+      console.error("Failed to delete tour:", error);
+      alert("Failed to delete tour: " + error.message);
+    }
+  };
+
+  // Group tours by category for display
+  const toursByCategory = useMemo(() => {
+    const grouped = {};
+    
+    // Initialize with all categories
+    categories.forEach(category => {
+      grouped[category.categoryKey] = {
+        ...category,
+        tours: []
+      };
+    });
+    
+    // Add tours to their respective categories
+    tours.forEach(tour => {
+      if (grouped[tour.category]) {
+        grouped[tour.category].tours.push(tour);
+      }
+    });
+    
+    return Object.values(grouped);
+  }, [categories, tours]);
 
   // Don't render if not authenticated
   const isLoggedIn = localStorage.getItem("admin_logged_in");
@@ -171,7 +266,16 @@ export default function AdminDashboard() {
     );
   }
 
-  const categoryOptions = categories.map(cat => cat.name.toLowerCase());
+  if (dataLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-eco mx-auto"></div>
+          <p className="mt-4 text-gray-600">Loading dashboard...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -180,7 +284,7 @@ export default function AdminDashboard() {
         <div className="max-w-7xl mx-auto px-4 md:px-6 py-4 flex items-center justify-between">
           <div className="flex items-center gap-4">
             <div className="flex items-end gap-2">
-             
+              <h1 className="text-2xl font-bold text-eco">EcoVenture</h1>
               <span className="text-xs text-gray-500 mb-1">Admin Dashboard</span>
             </div>
           </div>
@@ -200,6 +304,42 @@ export default function AdminDashboard() {
 
       {/* Main Content */}
       <main className="max-w-7xl mx-auto px-4 md:px-6 py-8">
+        {/* Dashboard Stats */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+          <div className="bg-white rounded-lg p-6 shadow-sm border">
+            <h3 className="text-sm font-medium text-gray-500">Total Tours</h3>
+            <p className="text-2xl font-bold text-gray-900">{tours.length}</p>
+          </div>
+          <div className="bg-white rounded-lg p-6 shadow-sm border">
+            <h3 className="text-sm font-medium text-gray-500">Categories</h3>
+            <p className="text-2xl font-bold text-gray-900">{categories.length}</p>
+          </div>
+          <div className="bg-white rounded-lg p-6 shadow-sm border">
+            <h3 className="text-sm font-medium text-gray-500">Countries</h3>
+            <p className="text-2xl font-bold text-gray-900">
+              {new Set(tours.map(t => t.country)).size}
+            </p>
+          </div>
+        </div>
+
+        {/* Error Display */}
+        {error && (
+          <div className="bg-red-50 border border-red-200 rounded-lg p-4 mb-6">
+            <div className="flex items-center">
+              <div className="text-red-800">
+                <p className="font-medium">Error</p>
+                <p className="text-sm">{error}</p>
+              </div>
+              <button
+                onClick={() => setError(null)}
+                className="ml-auto text-red-600 hover:text-red-800"
+              >
+                ×
+              </button>
+            </div>
+          </div>
+        )}
+
         <div className="flex items-center justify-between mb-8">
           <div>
             <h1 className="text-3xl font-bold text-gray-900">Tour Management</h1>
@@ -259,9 +399,10 @@ export default function AdminDashboard() {
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-eco focus:border-transparent"
                   required
                 >
-                  {categoryOptions.map(option => (
-                    <option key={option} value={option}>
-                      {option.charAt(0).toUpperCase() + option.slice(1).replace('-', ' ')}
+                  <option value="">Select a category</option>
+                  {categories.map(category => (
+                    <option key={category.id} value={category.categoryKey}>
+                      {category.name}
                     </option>
                   ))}
                 </select>
@@ -294,7 +435,8 @@ export default function AdminDashboard() {
                   onChange={handleInputChange}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-eco focus:border-transparent"
                   min="0"
-                  placeholder="e.g., 1295"
+                  step="0.01"
+                  placeholder="e.g., 1295.00"
                   required
                 />
               </div>
@@ -310,11 +452,27 @@ export default function AdminDashboard() {
                   onChange={handleInputChange}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-eco focus:border-transparent"
                   min="0"
-                  placeholder="e.g., 1495"
+                  step="0.01"
+                  placeholder="e.g., 1495.00"
                 />
               </div>
 
-              <div className="md:col-span-2">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Base Slots
+                </label>
+                <input
+                  type="number"
+                  name="baseSlots"
+                  value={newTour.baseSlots}
+                  onChange={handleInputChange}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-eco focus:border-transparent"
+                  min="1"
+                  placeholder="e.g., 12"
+                />
+              </div>
+
+              <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   Image URL
                 </label>
@@ -324,7 +482,7 @@ export default function AdminDashboard() {
                   value={newTour.image}
                   onChange={handleInputChange}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-eco focus:border-transparent"
-                  placeholder="/tour-image.jpg"
+                  placeholder="/tour-image.jpg or full URL"
                 />
               </div>
 
@@ -336,7 +494,7 @@ export default function AdminDashboard() {
                   name="description"
                   value={newTour.description}
                   onChange={handleInputChange}
-                  rows="3"
+                  rows="4"
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-eco focus:border-transparent"
                   placeholder="Brief description of the tour..."
                   required
@@ -347,13 +505,16 @@ export default function AdminDashboard() {
                 <button
                   type="submit"
                   disabled={loading}
-                  className="bg-eco text-white px-6 py-2 rounded-lg hover:bg-emerald-700 disabled:opacity-50 transition-colors font-medium"
+                  className="bg-eco text-white px-6 py-2 rounded-lg hover:bg-emerald-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors font-medium"
                 >
                   {loading ? "Adding Tour..." : "Add Tour"}
                 </button>
                 <button
                   type="button"
-                  onClick={() => setShowAddForm(false)}
+                  onClick={() => {
+                    setShowAddForm(false);
+                    setError(null);
+                  }}
                   className="bg-gray-200 text-gray-800 px-6 py-2 rounded-lg hover:bg-gray-300 transition-colors"
                 >
                   Cancel
@@ -365,61 +526,105 @@ export default function AdminDashboard() {
 
         {/* Tours Overview */}
         <div className="space-y-6">
-          <h2 className="text-2xl font-semibold text-gray-900">Current Tours</h2>
+          <div className="flex items-center justify-between">
+            <h2 className="text-2xl font-semibold text-gray-900">Current Tours</h2>
+            <button
+              onClick={loadTours}
+              className="text-eco hover:text-emerald-700 font-medium"
+            >
+              Refresh
+            </button>
+          </div>
           
-          {categories.length === 0 ? (
+          {toursByCategory.length === 0 ? (
             <div className="bg-white rounded-xl border p-8 text-center">
-              <p className="text-gray-500">Loading categories...</p>
+              <p className="text-gray-500">No categories available.</p>
             </div>
           ) : (
-            categories.map((category) => (
-              <div key={category.id} className="bg-white rounded-xl shadow-sm border p-6">
+            toursByCategory.map((categoryData) => (
+              <div key={categoryData.id} className="bg-white rounded-xl shadow-sm border p-6">
                 <div className="flex items-center justify-between mb-4">
-                  <h3 className="text-xl font-semibold capitalize text-gray-900">
-                    {category.name}
-                  </h3>
+                  <div>
+                    <h3 className="text-xl font-semibold capitalize text-gray-900">
+                      {categoryData.name}
+                    </h3>
+                    <p className="text-sm text-gray-500 mt-1">{categoryData.description}</p>
+                  </div>
                   <span className="bg-gray-100 text-gray-700 px-3 py-1 rounded-full text-sm">
-                    {category.tours.length} tours
+                    {categoryData.tours.length} tours
                   </span>
                 </div>
                 
-                {category.tours.length === 0 ? (
+                {categoryData.tours.length === 0 ? (
                   <p className="text-gray-500 text-center py-8">No tours in this category yet.</p>
                 ) : (
                   <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-                    {category.tours.map((tour) => (
-                      <div key={tour.id} className="border rounded-lg p-4 hover:shadow-md transition-shadow">
+                    {categoryData.tours.map((tour) => (
+                      <div key={tour.id} className="border rounded-lg p-4 hover:shadow-md transition-shadow relative group">
+                        {/* Delete button */}
+                        <button
+                          onClick={() => handleDeleteTour(tour.id, tour.name)}
+                          className="absolute top-2 right-2 text-red-500 hover:text-red-700 opacity-0 group-hover:opacity-100 transition-opacity bg-white rounded-full p-1 shadow-sm"
+                          title="Delete tour"
+                        >
+                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12"></path>
+                          </svg>
+                        </button>
+
                         {tour.image && (
                           <img 
                             src={tour.image} 
                             alt={tour.name}
                             className="w-full h-32 object-cover rounded-md mb-3"
                             onError={(e) => {
-                              e.target.style.display = 'none';
+                              e.target.src = '/default-tour.jpg';
                             }}
                           />
                         )}
-                        <h4 className="font-semibold text-gray-900">{tour.name}</h4>
+                        <h4 className="font-semibold text-gray-900 pr-6">{tour.name}</h4>
                         <p className="text-sm text-gray-600 mt-1">{tour.country}</p>
                         <p className="text-sm text-gray-500 mt-2 line-clamp-2">{tour.description}</p>
+                        
                         <div className="flex items-center justify-between mt-3">
                           <span className="text-sm text-gray-600">{tour.days} days</span>
                           <div className="text-right">
                             {tour.oldPrice && (
                               <span className="text-xs text-gray-400 line-through mr-1">
-                                £{tour.oldPrice}
+                                £{formatMoney(tour.oldPrice)}
                               </span>
                             )}
-                            <span className="font-semibold text-eco">£{tour.price}</span>
+                            <span className="font-semibold text-eco">£{formatMoney(tour.price)}</span>
                           </div>
                         </div>
-                        <div className="flex items-center mt-2">
-                          <div className="flex text-yellow-400">
-                            {"★".repeat(Math.floor(tour.rating))}
+                        
+                        <div className="flex items-center justify-between mt-2">
+                          <div className="flex items-center">
+                            <div className="flex text-yellow-400 text-sm">
+                              {"★".repeat(Math.floor(tour.rating || 4.5))}
+                            </div>
+                            <span className="text-xs text-gray-500 ml-2">
+                              {tour.rating || 4.5} ({tour.reviews || 0} reviews)
+                            </span>
                           </div>
-                          <span className="text-xs text-gray-500 ml-2">
-                            {tour.rating} ({tour.reviews} reviews)
-                          </span>
+                          {tour.availability && (
+                            <span className={[
+                              "text-xs px-2 py-1 rounded-full",
+                              tour.availability === 'available' 
+                                ? "bg-green-100 text-green-800" 
+                                : tour.availability === 'limited'
+                                ? "bg-yellow-100 text-yellow-800"
+                                : "bg-red-100 text-red-800"
+                            ].join(" ")}>
+                              {tour.availability}
+                            </span>
+                          )}
+                        </div>
+                        
+                        {/* Tour metadata */}
+                        <div className="mt-3 pt-3 border-t text-xs text-gray-400">
+                          <p>ID: {tour.tourKey || tour.id}</p>
+                          <p>Slots: {tour.baseSlots || 12}</p>
                         </div>
                       </div>
                     ))}
@@ -432,4 +637,14 @@ export default function AdminDashboard() {
       </main>
     </div>
   );
+}
+
+function formatMoney(n) {
+  try {
+    return new Intl.NumberFormat("en-GB", { 
+      maximumFractionDigits: 0 
+    }).format(Number(n));
+  } catch {
+    return String(n);
+  }
 }
